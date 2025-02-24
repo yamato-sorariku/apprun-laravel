@@ -37,11 +37,11 @@ jobs:
       # Dockerイメージをビルド
       - name: Build Docker image
         run: |
-          docker build -t yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ github.sha }} .
-          docker tag yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ github.sha }} yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ env.TAG }}
+          docker build -t yamato-sorariku.sakuracr.jp/${{ github.n }}:${{ github.sha }} .
+          docker tag yamato-sorariku.sakuracr.jp/apprun-laravel:${{ github.sha }} yamato-sorariku.sakuracr.jp/apprun-laravel:${{ env.TAG }}
 
       # Dockerイメージをプッシュ
       - name: Push Docker image
         run: |
-          docker push yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ github.sha }}
-          docker push yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ env.TAG }}
+          docker push yamato-sorariku.sakuracr.jp/apprun-laravel:${{ github.sha }}
+          docker push yamato-sorariku.sakuracr.jp/apprun-laravel:${{ env.TAG }}
