@@ -1,0 +1,47 @@
+name: Workflow Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    permissions:
+      contents: read
+      packages: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Sakura Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: yamato-sorariku.sakuracr.jp
+          username: ${{ secrets.SAKURA_REGISTRY_USER }}
+          password: ${{ secrets.SAKURA_REGISTRY_PASSWORD }}
+
+      # タグを設定
+      - name: Set Docker tag
+        id: set-tag
+        run: |
+          if [ "${{ github.ref_name }}" == "master" ]; then
+            echo "TAG=production" >> $GITHUB_ENV
+          else
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      # Dockerイメージをビルド
+      - name: Build Docker image
+        run: |
+          docker build -t yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ github.sha }} .
+          docker tag yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ github.sha }} yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ env.TAG }}
+
+      # Dockerイメージをプッシュ
+      - name: Push Docker image
+        run: |
+          docker push yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ github.sha }}
+          docker push yamato-sorariku.sakuracr.jp/${{ github.repository }}:${{ env.TAG }}
