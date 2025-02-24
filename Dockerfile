@@ -1,8 +1,8 @@
 FROM php:8.4.4-apache-bullseye
 
-WORKDIR /app
+WORKDIR /home/www/code
 
-ENV APACHE_DOCUMENT_ROOT /app/public
+ENV APACHE_DOCUMENT_ROOT /home/www/code/public
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
@@ -18,10 +18,19 @@ RUN apt update -y && apt install -y \
 COPY --from=composer:2.8.5 /usr/bin/composer /usr/bin/composer
 
 # Copy source code
-COPY ./src /app
+ADD src /home/www/code
 
 # Install dependencies
-RUN composer install
+ENV COMPOSER_ALLOW_SUPERUSER 1
+RUN composer install --no-dev
+
+RUN mkdir -p /home/www/code/storage/app/public \
+    && mkdir -p /home/www/code/storage/framework/cache \
+    && mkdir -p /home/www/code/storage/framework/sessions \
+    && mkdir -p /home/www/code/storage/framework/testing \
+    && mkdir -p /home/www/code/storage/framework/views \
+    && mkdir -p /home/www/code/storage/logs \
+    && chmod -R 777 /home/www/code/storage
 
 # Expose port 80
 EXPOSE 80
